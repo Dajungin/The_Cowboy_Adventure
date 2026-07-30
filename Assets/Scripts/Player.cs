@@ -117,17 +117,29 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject == null)
+            return;
+
+
         if (collision.gameObject.CompareTag("Enemy"))
         {
             hp--;
 
+            Destroy(collision.gameObject);
+
             if (hp <= 0)
             {
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.GameOver();
+                }
+                else
+                {
+                    Debug.LogError("GameManager가 없습니다.");
+                }
+
                 Destroy(gameObject);
             }
-
-            // 충돌한 적 삭제
-            Destroy(collision.gameObject);
         }
     }
 

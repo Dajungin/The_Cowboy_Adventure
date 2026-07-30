@@ -47,4 +47,9 @@ public class EnemySpawn : MonoBehaviour
 
         Instantiate(monsters[randomIndex], pos, Quaternion.identity);
     }
+
+    public void StopSpawn()
+    {
+        CancelInvoke(nameof(Spawn));
+    }
 }

@@ -1529,6 +1529,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpown
   monsters:
   - {fileID: 775068646338930743, guid: 391dc47c3e6d0b74e828768153dc30df, type: 3}
+  - {fileID: 775068646338930743, guid: d6c9bacc92bfd0542be652201db26a88, type: 3}
+  - {fileID: 775068646338930743, guid: 9ff57f134f5bea54681e2be93ed94016, type: 3}
+  - {fileID: 775068646338930743, guid: 78561c48268fb5649b076db49c72f314, type: 3}
   time: 2
 --- !u!4 &2143249647
 Transform:
