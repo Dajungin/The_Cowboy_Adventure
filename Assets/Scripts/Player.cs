@@ -125,6 +125,9 @@ public class Player : MonoBehaviour
             {
                 Destroy(gameObject);
             }
+
+            // 충돌한 적 삭제
+            Destroy(collision.gameObject);
         }
     }
 
