@@ -1,80 +1,175 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 
 public class Player : MonoBehaviour
 {
-    //플레이어 한테 필요한거
-    //이동, 공격, 목숨, 적 , 화면에서 벗어나지 않기
-
     [Header("Player")]
     public float speed = 5f;
-    public int hp = 3; //어떻게 표현할 것인가...
+    public int hp = 3;
+
 
     private Rigidbody2D rb;
     private Vector2 move;
     private Camera cam;
+
 
     private float minX;
     private float maxX;
     private float minY;
     private float maxY;
 
+
+
+    [Header("Item")]
+    public int bulletCount = 1;
+
+    public float fireDelay = 0.3f;
+
+    private float defaultSpeed;
+    private float defaultFireDelay;
+
+
+    public bool shotgun;
+    public bool machineGun;
+    public bool sheriff;
+    public bool wagonWheel;
+    public bool tombStone;
+
+
+
     [Header("Attack")]
     public GameObject bulletPrefab;
     public GameObject firePos;
+
+
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         cam = Camera.main;
     }
 
+
+
     void Start()
     {
         Vector3 min = cam.ViewportToWorldPoint(Vector3.zero);
         Vector3 max = cam.ViewportToWorldPoint(Vector3.one);
 
-        float halfWidth = GetComponent<SpriteRenderer>().bounds.extents.x;
-        float halfHeight = GetComponent<SpriteRenderer>().bounds.extents.y;
+
+        float halfWidth =
+            GetComponent<SpriteRenderer>().bounds.extents.x;
+
+        float halfHeight =
+            GetComponent<SpriteRenderer>().bounds.extents.y;
+
 
         minX = min.x + halfWidth;
         maxX = max.x - halfWidth;
+
         minY = min.y + halfHeight;
         maxY = max.y - halfHeight;
+
+
+        defaultSpeed = speed;
+        defaultFireDelay = fireDelay;
     }
+
+
 
     void Update()
     {
         MoveInput();
         LookMouse();
 
+
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             Shoot();
         }
-
     }
-    //총알 
+
+
+
+    // =====================
+    // 공격
+    // =====================
+
     void Shoot()
     {
+
+        // 마차 바퀴
+        if (wagonWheel)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                FireBullet(i * 45);
+            }
+
+            return;
+        }
+
+
+
+        // 산탄총
+        if (shotgun || sheriff)
+        {
+            FireBullet(-20);
+            FireBullet(0);
+            FireBullet(20);
+
+            return;
+        }
+
+
+
+        // 기본 공격
+        FireBullet(0);
+    }
+
+
+
+    void FireBullet(float angle)
+    {
+        Quaternion rot =
+        Quaternion.Euler(
+            0,
+            0,
+            firePos.transform.eulerAngles.z + angle
+        );
+
+
         Instantiate(
             bulletPrefab,
             firePos.transform.position,
-            firePos.transform.rotation
+            rot
         );
     }
 
+
+
+    // =====================
+    // 이동
+    // =====================
+
+
     void FixedUpdate()
     {
-        rb.linearVelocity = move.normalized * speed;
+        rb.linearVelocity =
+            move.normalized * speed;
+
 
         ClampPlayer();
     }
 
-    //이동
+
+
     void MoveInput()
     {
         move = Vector2.zero;
+
 
         if (Keyboard.current.wKey.isPressed)
             move.y = 1;
@@ -89,43 +184,77 @@ public class Player : MonoBehaviour
             move.x = 1;
     }
 
-    //화면 밖으로 나가지 않기 
+
+
     void ClampPlayer()
     {
         Vector3 pos = transform.position;
 
+
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.y = Mathf.Clamp(pos.y, minY, maxY);
 
+
         transform.position = pos;
     }
-    //마우스 있는 곳 보기
+
+
+
     void LookMouse()
     {
-        Vector3 mousePos = Mouse.current.position.ReadValue();
+        Vector3 mousePos =
+            Mouse.current.position.ReadValue();
 
-        mousePos.z = -cam.transform.position.z;
 
-        Vector3 worldPos = cam.ScreenToWorldPoint(mousePos);
+        mousePos.z =
+            -cam.transform.position.z;
 
-        Vector2 dir = worldPos - transform.position;
 
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        Vector3 worldPos =
+            cam.ScreenToWorldPoint(mousePos);
 
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        Vector2 dir =
+            worldPos - transform.position;
+
+
+        float angle =
+            Mathf.Atan2(dir.y, dir.x)
+            * Mathf.Rad2Deg;
+
+
+        transform.rotation =
+            Quaternion.Euler(0, 0, angle);
     }
+
+
+
+    // =====================
+    // 충돌
+    // =====================
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject == null)
-            return;
-
 
         if (collision.gameObject.CompareTag("Enemy"))
         {
+
+            // 묘비 효과
+            if (tombStone)
+            {
+                Destroy(collision.gameObject);
+                return;
+            }
+
+
+
             hp--;
 
+
             Destroy(collision.gameObject);
+
+
 
             if (hp <= 0)
             {
@@ -133,14 +262,227 @@ public class Player : MonoBehaviour
                 {
                     GameManager.Instance.GameOver();
                 }
-                else
-                {
-                    Debug.LogError("GameManager가 없습니다.");
-                }
+
 
                 Destroy(gameObject);
             }
         }
+    }
+
+
+
+
+
+    // =====================
+    // 아이템 효과
+    // =====================
+
+
+    // 생명 증가
+    public void LifeUp()
+    {
+        hp++;
+
+        Debug.Log("생명 증가");
+    }
+
+
+
+
+    // 커피
+    public void StartCoffee()
+    {
+        StartCoroutine(Coffee());
+    }
+
+
+    IEnumerator Coffee()
+    {
+        speed *= 1.5f;
+
+
+        yield return new WaitForSeconds(16);
+
+
+        speed = defaultSpeed;
+    }
+
+
+
+
+
+    // 기관총
+    public void StartMachineGun()
+    {
+        StartCoroutine(MachineGun());
+    }
+
+
+    IEnumerator MachineGun()
+    {
+        machineGun = true;
+
+
+        fireDelay = 0.08f;
+
+
+        yield return new WaitForSeconds(12);
+
+
+        fireDelay = defaultFireDelay;
+
+
+        machineGun = false;
+    }
+
+
+
+
+
+    // 핵폭탄
+    public void UseNuclearBomb()
+    {
+        Enemy[] enemies =
+        FindObjectsByType<Enemy>
+        (FindObjectsSortMode.None);
+
+
+        foreach (Enemy enemy in enemies)
+        {
+            Destroy(enemy.gameObject);
+        }
+
+
+        Debug.Log("핵폭탄!");
+    }
+
+
+
+
+
+    // 산탄총
+    public void StartShotGun()
+    {
+        StartCoroutine(ShotGun());
+    }
+
+
+    IEnumerator ShotGun()
+    {
+        shotgun = true;
+
+
+        yield return new WaitForSeconds(12);
+
+
+        shotgun = false;
+    }
+
+
+
+
+
+    // 연막탄
+    public void UseSmokeBomb()
+    {
+        Enemy[] enemies =
+        FindObjectsByType<Enemy>
+        (FindObjectsSortMode.None);
+
+
+        foreach (Enemy enemy in enemies)
+        {
+            enemy.StopEnemy(2);
+        }
+    }
+
+
+
+
+
+    // 보안관 배지
+    public void StartSheriffBadge()
+    {
+        StartCoroutine(SheriffBadge());
+    }
+
+
+
+    IEnumerator SheriffBadge()
+    {
+        sheriff = true;
+
+
+        speed *= 1.3f;
+
+        fireDelay = 0.1f;
+
+
+
+        yield return new WaitForSeconds(24);
+
+
+
+        sheriff = false;
+
+
+        speed = defaultSpeed;
+
+        fireDelay = defaultFireDelay;
+    }
+
+
+
+
+
+    // 묘비
+    public void StartTombStone()
+    {
+        StartCoroutine(TombStone());
+    }
+
+
+
+    IEnumerator TombStone()
+    {
+        tombStone = true;
+
+
+        speed *= 1.3f;
+
+
+
+        yield return new WaitForSeconds(8);
+
+
+
+        tombStone = false;
+
+
+        speed = defaultSpeed;
+    }
+
+
+
+
+
+    // 마차 바퀴
+    public void StartWagonWheel()
+    {
+        StartCoroutine(WagonWheel());
+    }
+
+
+
+    IEnumerator WagonWheel()
+    {
+        wagonWheel = true;
+
+
+        yield return new WaitForSeconds(12);
+
+
+        wagonWheel = false;
     }
 
 }

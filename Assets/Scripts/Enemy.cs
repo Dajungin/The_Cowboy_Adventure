@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.InputSystem;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -27,7 +30,34 @@ public class Enemy : MonoBehaviour
 
         if (hp <= 0)
         {
+
+            if (ItemManager.Instance != null)
+            {
+                if (Random.Range(0, 100) < 20)
+                {
+                    ItemManager.Instance.DropItem(transform.position);
+                }
+            }
+
             Destroy(gameObject);
         }
+    }
+    public void StopEnemy(float time)
+    {
+        StartCoroutine(StopCoroutine(time));
+    }
+
+
+    IEnumerator StopCoroutine(float time)
+    {
+        float oldSpeed = speed;
+
+        speed = 0;
+
+
+        yield return new WaitForSeconds(time);
+
+
+        speed = oldSpeed;
     }
 }
