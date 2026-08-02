@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -20,7 +20,8 @@ public class Player : MonoBehaviour
     private float minY;
     private float maxY;
 
-
+    [Header("UI")]
+    public TMP_Text hpText;
 
     [Header("Item")]
     public int bulletCount = 1;
@@ -58,6 +59,8 @@ public class Player : MonoBehaviour
         Vector3 min = cam.ViewportToWorldPoint(Vector3.zero);
         Vector3 max = cam.ViewportToWorldPoint(Vector3.one);
 
+        defaultSpeed = speed;
+        defaultFireDelay = fireDelay;
 
         float halfWidth =
             GetComponent<SpriteRenderer>().bounds.extents.x;
@@ -91,7 +94,13 @@ public class Player : MonoBehaviour
         }
     }
 
-
+    void UpdateHPUI()
+    {
+        if (hpText != null)
+        {
+            hpText.text = "HP : " + hp;
+        }
+    }
 
     // =====================
     // 공격
@@ -251,6 +260,7 @@ public class Player : MonoBehaviour
 
             hp--;
 
+            UpdateHPUI();
 
             Destroy(collision.gameObject);
 
@@ -283,9 +293,10 @@ public class Player : MonoBehaviour
     {
         hp++;
 
+        UpdateHPUI();
+
         Debug.Log("생명 증가");
     }
-
 
 
 
