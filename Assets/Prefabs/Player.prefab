@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4979510682049267804}
@@ -182,6 +182,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   speed: 5
   hp: 3
+  hpText: {fileID: 0}
+  bulletCount: 1
+  fireDelay: 0.3
+  shotgun: 0
+  machineGun: 0
+  sheriff: 0
+  wagonWheel: 0
+  tombStone: 0
   bulletPrefab: {fileID: 4287972070777221027, guid: 0ad8ec3522595ba4ba0abc47a2ea0e59, type: 3}
   firePos: {fileID: 7743708424398744072}
 --- !u!1 &7743708424398744072
